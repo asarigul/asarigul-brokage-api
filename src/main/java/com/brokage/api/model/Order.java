@@ -7,24 +7,32 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "orders", //
 		indexes = { //
-				@Index(name = "idx_customer_date", columnList = "customerId, createDate") } //
+				@Index(name = "idx_orders_customer_date", columnList = "customerId, createDate") } //
 )
 
 public class Order {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
 
-	private Long customerId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "customer_id", nullable = false)
+	private Customer customer;
+	
 	private String assetName;
 
 	@Enumerated(EnumType.STRING)
@@ -58,12 +66,17 @@ public class Order {
 		this.id = id;
 	}
 
-	public Long getCustomerId() {
-		return customerId;
+	public Customer getCustomer() {
+		return customer;
 	}
 
-	public void setCustomerId(Long customerId) {
-		this.customerId = customerId;
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
+	}
+	
+	@Transient
+	public Long getCustomerId() {
+	    return customer != null ? customer.getId() : null;
 	}
 
 	public String getAssetName() {

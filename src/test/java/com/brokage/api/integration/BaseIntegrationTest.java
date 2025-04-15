@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Import(TestHelper.class)
@@ -28,7 +28,7 @@ public abstract class BaseIntegrationTest {
 	
 	@BeforeAll
 	static void setup(@Autowired TestHelper helper) throws Exception {
-		// initialize customer & TRY asset before tests
+		// initialize test customer & TRY asset before tests
 		helper.customer();
 		helper.tryAsset();
 	}

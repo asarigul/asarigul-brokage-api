@@ -95,20 +95,23 @@ public class TestHelper {
 
 	public Asset createAsset(String assetName, BigDecimal size, Customer customer) {
 		Asset asset = new Asset();
-		asset.setCustomerId(customer.getId());
+		asset.setCustomer(customer);
 		asset.setAssetName(assetName);
 		asset.setSize(size);
 		asset.setUsableSize(size);
 		return assetRepository.save(asset);
 	}
 	
-	public void resetAsset(String assetName, BigDecimal size) {
+	public void ensureAssetBalance(String assetName, BigDecimal size) {
 		Optional<Asset> tryAsset = getAsset(assetName);
-		if(tryAsset.isPresent()) {
-			assetRepository.deleteById(tryAsset.get().getId());
+		if(! tryAsset.isPresent()) {
+			createAsset(assetName, size, customer());
+		} else {
+			Asset asset = tryAsset.get();
+			asset.setSize(size);
+			asset.setUsableSize(size);
+			assetRepository.save(asset);			
 		}
-		
-		createAsset(assetName, size, customer());
 	}
 
 	public Customer createCustomer(String userName, String password, boolean isAdmin) {

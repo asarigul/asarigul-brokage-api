@@ -4,24 +4,31 @@ import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(
 	indexes = { //
-		@Index( name = "idx_customer_asset", columnList = "customerId, assetName", unique = true) } //
+		@Index( name = "ux_asset_customer_asset", columnList = "customerId, assetName", unique = true) } //
 )
 public class Asset {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private Long customerId;
 	private String assetName;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "customer_id", nullable = false)
+	private Customer customer;
 	
 	@Column(nullable = false, precision = 19, scale = 4)
 	private BigDecimal size;
@@ -37,12 +44,17 @@ public class Asset {
 		this.id = id;
 	}
 
+	@Transient
 	public Long getCustomerId() {
-		return customerId;
+	    return customer != null ? customer.getId() : null;
 	}
 
-	public void setCustomerId(Long customerId) {
-		this.customerId = customerId;
+	public Customer getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
 	}
 
 	public String getAssetName() {

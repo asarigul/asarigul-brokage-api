@@ -34,7 +34,7 @@ public class SystemConcurrencyTest extends BaseIntegrationTest {
 	    final int expectedSuccess = 5;
 	    BigDecimal tryBalance = orderSize.multiply(price).multiply(BigDecimal.valueOf(expectedSuccess));
 	    
-	    helper.resetAsset("TRY", tryBalance);
+	    helper.ensureAssetBalance("TRY", tryBalance);
 
 	    // Prepare threads
 	    ExecutorService executor = Executors.newFixedThreadPool(threadCount);

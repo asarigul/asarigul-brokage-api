@@ -14,6 +14,7 @@ import com.brokage.api.exception.InsufficientBalanceException;
 import com.brokage.api.exception.OrderNotFoundException;
 import com.brokage.api.exception.SecurityException;
 import com.brokage.api.model.Asset;
+import com.brokage.api.model.Customer;
 import com.brokage.api.model.Order;
 import com.brokage.api.repository.AssetRepository;
 import com.brokage.api.repository.OrderRepository;
@@ -63,7 +64,7 @@ public class OrderService {
 			if(otherAsset == null) {
 				otherAsset = new Asset();
 				otherAsset.setAssetName(assetName);
-				otherAsset.setCustomerId(customerId);
+				otherAsset.setCustomer(new Customer(customerId));
 				otherAsset.setSize(BigDecimal.ZERO);
 				otherAsset.setUsableSize(BigDecimal.ZERO);
 			} 
@@ -75,7 +76,7 @@ public class OrderService {
 		otherAsset = assetRepository.save(otherAsset);
 
 		Order order = new Order();
-		order.setCustomerId(customerId);
+		order.setCustomer(new Customer(customerId));
 		order.setStatus(Order.Status.PENDING);
 		order.setCreateDate(LocalDateTime.now());
 		order.setAssetName(assetName);

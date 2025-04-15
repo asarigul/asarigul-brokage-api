@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,6 +26,11 @@ public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
 
 	@Autowired
 	private TestHelper helper;
+	
+	@BeforeAll
+	static void setup(@Autowired TestHelper helper) throws Exception {
+		helper.ensureAssetBalance("TRY", BigDecimal.valueOf(1000));
+	}
 
 	@Test
 	void createBuyOrder_shouldSucceed_whenCustomerHasSufficientBalance() throws Exception {
