@@ -53,7 +53,7 @@ Before starting the application with prod profile, set the following environment
 ```
 DS_USERNAME=myuser DS_PASSWORD=mypass JWT_SECRET_KEY=mysecret ./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
 ```
-The app will start on http://localhost:8080 (Update application.properties to change server port.)
+The app will start on http://localhost:8080 (Update application.properties to change ```server.port=8080```)
 
 ## API Endpoints
 
