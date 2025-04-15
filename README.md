@@ -39,8 +39,7 @@ Or explicitly specify the dev profile:
 
 You may update application.properties line: ```spring.profiles.active=dev```
 
-**Note**: application-dev.properties has: ```spring.jpa.hibernate.ddl-auto=update```, so required tables (Order, Asset, and Customer) are auto created. For prod mode, you can use the queries in 
-```src/main/resources/ddl.sql```
+**Note**: H2 in-memory database is used, so application.properties has: ```spring.jpa.hibernate.ddl-auto=update``` and required tables (Order, Asset, and Customer) are auto created. Remove or comment out this line to change this behaviour.
 
 ### Production Mode
 Before starting the application with prod profile, set the following environment variables:
