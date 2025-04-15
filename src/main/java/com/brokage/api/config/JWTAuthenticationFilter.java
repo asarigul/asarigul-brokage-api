@@ -9,6 +9,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.brokage.api.exception.SecurityException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -19,9 +22,6 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.brokage.api.exception.SecurityException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class JWTAuthenticationFilter implements Filter {
@@ -42,33 +42,38 @@ public class JWTAuthenticationFilter implements Filter {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		String authorizationHeader = httpRequest.getHeader(AUTHORIZATION_HEADER);
+		
+		if(authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
+			authorizationError(httpResponse);
+			return;
+		}
 
-		if (SecurityContextHolder.getContext().getAuthentication() == null && authorizationHeader != null
-				&& authorizationHeader.startsWith(BEARER_PREFIX)) {
+		if (SecurityContextHolder.getContext().getAuthentication() == null) {
 			String token = authorizationHeader.substring(BEARER_PREFIX.length());
 
 			try {
 				Claims claims = validateToken(token);
 				String userId = claims.getSubject();
 				Boolean isAdmin = claims.get("isAdmin", Boolean.class);
-
 				
-				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId,
-						isAdmin, null);
-				SecurityContextHolder.getContext().setAuthentication(authentication);
+				SecurityContextHolder.getContext().setAuthentication(
+						new UsernamePasswordAuthenticationToken(userId, isAdmin, null));
 			} catch (Exception e) {
-				com.brokage.api.exception.SecurityException se = new SecurityException("Cannot authorize request");
-				httpResponse.setStatus(se.getStatus().value());
-				httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
-				objectMapper.writeValue(response.getWriter(), se.getResponseBody());
+				authorizationError(httpResponse);
 				return;
 			}
 		}
 
 		chain.doFilter(request, response);
 	}
-
 	
+	private void authorizationError(HttpServletResponse httpResponse) throws IOException {
+		SecurityException se = new SecurityException("No valid [Authorization: Bearer <Token>] header found");
+		httpResponse.setStatus(se.getStatus().value());
+		httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		objectMapper.writeValue(httpResponse.getWriter(), se.getResponseBody());
+	}
+
 	private Claims validateToken(String token) {
 		Key key = Keys.hmacShaKeyFor(config.getJwtSecretKey().getBytes(StandardCharsets.UTF_8));
 		return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();

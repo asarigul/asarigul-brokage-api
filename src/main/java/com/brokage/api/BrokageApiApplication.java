@@ -25,9 +25,9 @@ public class BrokageApiApplication {
 
 	@PostConstruct
 	public void runAfterStartup() {
-		if ("dev".equals(config.getActiveProfile())) {
-			authService.createAdminUser();
-		}
+//		if ("dev".equals(config.getActiveProfile())) {
+//			authService.createAdminUser();
+//		}
 		logger.info("API is ready");
 	}
 

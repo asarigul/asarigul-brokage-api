@@ -62,17 +62,17 @@ public class AuthenticationService {
 		return (Boolean) ensureAuthentication().getCredentials();
 	}
 	
-	public void createAdminUser() {
-		if(customerRepository.findByIsAdmin(true).isEmpty()) {
-			Customer admin = new Customer();
-			admin.setAdmin(true);
-			admin.setUsername("admin");
-			admin.setPassword("admin");
-			customerRepository.save(admin);
-			
-			logger.warn("Default admin user created. Username: " + admin.getUsername() + ", password: " + admin.getPassword());
-		}
-	}
+//	p ublic void createAdminUser() {
+//		if(customerRepository.findByIsAdmin(true).isEmpty()) {
+//			Customer admin = new Customer();
+//			admin.setAdmin(true);
+//			admin.setUsername("admin");
+//			admin.setPassword("admin");
+//			customerRepository.save(admin);
+//			
+//			logger.warn("Default admin user created. Username: " + admin.getUsername() + ", password: " + admin.getPassword());
+//		}
+//	}
 	
 	private static Authentication ensureAuthentication() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
