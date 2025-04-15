@@ -3,6 +3,7 @@ package com.brokage.api.service;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public class AuthenticationService {
                 .setSubject(String.valueOf(customerId))
                 .claim("isAdmin", isAdmin)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + config.getJwtExpiryMinutes() * 60 * 1000))  // 10 days expiration
+                .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(config.getJwtExpiryMinutes(), TimeUnit.MINUTES) ))  
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }

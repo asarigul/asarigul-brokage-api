@@ -1,6 +1,5 @@
 package com.brokage.api.exception;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,16 +18,10 @@ import org.springframework.web.context.request.WebRequest;
 public class GlobalExceptionHandler {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
-	public record ErrorResponse(LocalDateTime timestamp, String message) {
-		static ErrorResponse from(String message) {
-			return new ErrorResponse(LocalDateTime.now(), message);
-		}
-	}
-
 	@ExceptionHandler(BrokageApiException.class)
 	public ResponseEntity<ErrorResponse> handleBrokageException(BrokageApiException ex) {
 		logger.error("API exception", ex);
-		return ResponseEntity.status(ex.getStatus()).body(ErrorResponse.from(ex.getMessage()));
+		return ResponseEntity.status(ex.getStatus()).body(ex.getResponseBody());
 	}
 
 	@ExceptionHandler(Exception.class)

@@ -14,4 +14,8 @@ public abstract class BrokageApiException extends RuntimeException {
     }
     
     public abstract HttpStatus getStatus();
+
+	public final ErrorResponse getResponseBody() {
+		return ErrorResponse.from(getMessage());
+	}
 }

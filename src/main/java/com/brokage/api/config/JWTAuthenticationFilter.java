@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,14 +20,19 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import com.brokage.api.exception.SecurityException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Component
 public class JWTAuthenticationFilter implements Filter {
 	private static final String AUTHORIZATION_HEADER = "Authorization";
 	private static final String BEARER_PREFIX = "Bearer ";
 	private final ApplicationConfig config;
+	private final ObjectMapper objectMapper;
 
-	public JWTAuthenticationFilter(ApplicationConfig config) {
+	public JWTAuthenticationFilter(ApplicationConfig config, ObjectMapper objectMapper) {
 		this.config = config;
+		this.objectMapper = objectMapper;
 	}
 
 	@Override
@@ -51,8 +57,10 @@ public class JWTAuthenticationFilter implements Filter {
 						isAdmin, null);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			} catch (Exception e) {
-//				throw new com.brokage.api.exception.SecurityException("Cannot validate token!");
-				httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				com.brokage.api.exception.SecurityException se = new SecurityException("Cannot authorize request");
+				httpResponse.setStatus(se.getStatus().value());
+				httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+				objectMapper.writeValue(response.getWriter(), se.getResponseBody());
 				return;
 			}
 		}
