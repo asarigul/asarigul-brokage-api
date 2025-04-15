@@ -1,6 +1,5 @@
 package com.brokage.api.integration;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,10 +25,4 @@ public abstract class BaseIntegrationTest {
 	@Autowired
 	protected ObjectMapper objectMapper;
 	
-	@BeforeAll
-	static void setup(@Autowired TestHelper helper) throws Exception {
-		// initialize test customer & TRY asset before tests
-		helper.customer();
-		helper.tryAsset();
-	}
 }

@@ -13,7 +13,21 @@ A SpringBoot based backend service for a brokage platform that allows users to m
 
 ---
 
+## About initial user(s) creation
+At least 1 admin user is required for the API (to call admin-only and other customer services). A user definition parameter is required to create the users in startup. The format is ``username:password:isAdmin``. application-dev.properties includes 2 user definitions to be created; one admin and one regular customer:
+
+```
+users=admin:adminpass:true,user:userpass:false
+```
+So, you can use admin:adminpass credentials to test the admin-only and customer endpoints, and user:userpass to test customer endpoints.
+Similar to JWT Secret key or datasource credentials, ``users`` variable  should NOT be included in the properties in production mode. 
+Please see **To run the project/Production Mode** section below for instructions on how to define it in production.  
+
+
 ## To build the project
+
+**Maven wrapper included in the application, so you can build, run tests or the application by using mvnw executable.**
+
 ```
 ./mvnw clean install
 ```
@@ -33,13 +47,13 @@ To run the app locally in development (dev) mode:
 ./mvnw spring-boot:run
 ```
 Or explicitly specify the dev profile:
+
 ```
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 You may update application.properties line: ```spring.profiles.active=dev```
 
-**Note**: H2 in-memory database is used, so application.properties has: ```spring.jpa.hibernate.ddl-auto=update``` and required tables (Order, Asset, and Customer) are auto created. Remove or comment out this line to change this behaviour.
 
 ### Production Mode
 Before starting the application with prod profile, set the following environment variables:
@@ -49,17 +63,18 @@ Before starting the application with prod profile, set the following environment
 | DS_USERNAME    | Database username         |
 | DS_PASSWORD    | Database password         |
 | JWT_SECRET_KEY | Secret key for JWT tokens |
+| USERS          | Predefined users to create| |
 
 ```
-DS_USERNAME=myuser DS_PASSWORD=mypass JWT_SECRET_KEY=mysecret ./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
+DS_USERNAME=db_user DS_PASSWORD=db_pass JWT_SECRET_KEY=mysecret USERS=admin:pass:true,user:pass:false ./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
 ```
-The app will start on http://localhost:8080 (Update application.properties to change ```server.port=8080```)
+The app will start on http://localhost:8080 (Update application.properties to change server port: ```server.port=8080```)
 
 ## API Endpoints
 
 ### Login
 ```
-POST /api/auth/login
+POST /api/login
 {
   "username": "john",
   "password": "password123"
@@ -81,11 +96,40 @@ Http 401 UNAUTHORIZED
 }
 
 ```
-- Include returned token in all requests using the Authorization header. Otherwise you will get 401 UNAUTHORIZED.
+- Include returned token in all requests using the Authorization header. Otherwise you will get 401 UNAUTHORIZED error..
 ```
 Authorization: Bearer <your_token>
 ```
-- Default token expiry is 180 minutes. You can update it in application/properties.
+- Default token expiry is 180 minutes. You can update it in application/properties (```jwt.expiryMinutes=180```).
+
+### Create Customer (Optional service)
+```
+POST /api/customers
+{
+  "username": "someuser",
+  "password": "somepassword",
+  "isAdmin": false
+}
+
+RETURNS:
+
+201 CREATED
+{
+    "id": 1,
+	"username": "someuser",
+	"isAdmin": false
+}
+
+or
+
+400 BAD REQUEST (invalid request parameter)
+{
+    "message": "Non-blank username required", // or "Non-blank password required"
+    "timestamp": ...
+}
+```
+
+
 
 ### Create Order
 ```
@@ -99,7 +143,7 @@ POST /api/orders
 
 RETURNS:
 
-200 OK
+201 CREATED
 {
     "id": 1,
     "customerId": 1,
@@ -112,6 +156,12 @@ RETURNS:
 }
 
 or
+
+400 BAD REQUEST (invalid request parameter)
+{
+    "message": "Non-blank assetName required", // or "Positive size required" ...
+    "timestamp": ...
+}
 
 404 NOT FOUND (Missing required asset)
 {

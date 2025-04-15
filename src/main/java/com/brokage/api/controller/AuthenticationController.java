@@ -9,6 +9,8 @@ import com.brokage.api.dto.LoginRequest;
 import com.brokage.api.dto.LoginResponse;
 import com.brokage.api.service.AuthenticationService;
 
+import jakarta.validation.Valid;
+
 @RestController
 public class AuthenticationController {
 
@@ -17,7 +19,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/api/login")
-    public LoginResponse login(@RequestBody LoginRequest request) throws Exception {
+    public LoginResponse login(@RequestBody @Valid LoginRequest request) throws Exception {
         return authenticationService.login(request.username(), request.password());
     }
 }

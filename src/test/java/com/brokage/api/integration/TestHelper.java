@@ -2,6 +2,7 @@ package com.brokage.api.integration;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import com.brokage.api.config.ApplicationConfig;
 import com.brokage.api.dto.LoginRequest;
 import com.brokage.api.dto.LoginResponse;
 import com.brokage.api.model.Asset;
@@ -20,6 +22,8 @@ import com.brokage.api.model.Customer;
 import com.brokage.api.repository.AssetRepository;
 import com.brokage.api.repository.CustomerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.annotation.PostConstruct;
 
 @Component
 @TestComponent
@@ -36,53 +40,48 @@ public class TestHelper {
 
 	@Autowired
 	private ObjectMapper objectMapper;
-
-	public static final String USERNAME = "username";
-	public static final String PASSWORD = "password";
-	private static final String ADMIN = "ADMIN";
-
+	
+	@Autowired
+	private ApplicationConfig config;
+	
 	private Customer customer, admin;
 
 	private Asset tryAsset;
 	private String token, adminToken;
+	
+	@PostConstruct
+	public void init() throws Exception {
+		List<Customer> users = config.getPredefinedUsers();
+		
+		admin = users.stream().filter(Customer::isAdmin).findFirst().get();
+		admin.setId(customerRepository.findByUsername(admin.getUsername()).get().getId());
+		
+		customer = users.stream().filter(c -> !c.isAdmin()).findFirst().get();
+		customer.setId(customerRepository.findByUsername(customer.getUsername()).get().getId());
+		
+		tryAsset = createAsset("TRY", BigDecimal.valueOf(1000), customer);
+		
+		token = createToken(customer);
+		adminToken = createToken(admin);
+	}
 
 	public Customer customer() {
-		if (customer == null) {
-			customer = createCustomer(USERNAME, PASSWORD, false);
-		}
-
 		return customer;
 	}
 
 	public Customer admin() {
-		if (admin == null) {
-			admin = createCustomer(ADMIN, ADMIN, true);
-		}
-
 		return admin;
 	}
 
 	public Asset tryAsset() {
-		if (tryAsset == null) {
-			tryAsset = createAsset("TRY", BigDecimal.valueOf(1000), customer());
-		}
-
 		return tryAsset;
 	}
 
 	public String token() throws Exception {
-		if (token == null) {
-			token = createToken(customer());
-		}
-
 		return token;
 	}
 
 	public String adminToken() throws Exception {
-		if (adminToken == null) {
-			adminToken = createToken(admin());
-		}
-
 		return adminToken;
 	}
 
@@ -112,14 +111,6 @@ public class TestHelper {
 			asset.setUsableSize(size);
 			assetRepository.save(asset);			
 		}
-	}
-
-	public Customer createCustomer(String userName, String password, boolean isAdmin) {
-		Customer customer = new Customer();
-		customer.setUsername(userName);
-		customer.setPassword(password);
-		customer.setAdmin(isAdmin);
-		return customerRepository.save(customer);
 	}
 
 	public Optional<Asset> getAsset(String assetName) {

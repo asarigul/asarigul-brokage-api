@@ -22,6 +22,12 @@ public class Customer {
 	
 	public Customer() { }
 	
+	public Customer(String username, String password, boolean isAdmin) { 
+		this.username = username;
+		this.password = password;
+		this.isAdmin = isAdmin;
+	}
+	
 	public Customer(Long id) {
 		this.id = id;
 	}

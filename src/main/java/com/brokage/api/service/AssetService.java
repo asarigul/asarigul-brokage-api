@@ -11,24 +11,21 @@ import com.brokage.api.model.Asset;
 import com.brokage.api.repository.AssetRepository;
 
 @Service
-public class AssetService {
-	private final AuthenticationService authService;
+public class AssetService extends BaseService {
 	private final AssetRepository assetRepository;
 
-	public AssetService(AssetRepository assetRepository, AuthenticationService authService) {
+	public AssetService(AssetRepository assetRepository) {
 		this.assetRepository = assetRepository;
-		this.authService = authService;
 	}
 
 	public List<AssetResponse> listAssets() {
-		Long customerId = authService.getAuthenticatedCustomerId();
-		return listAssets(customerId);
+		return listAssets(getAuthenticatedCustomerId());
 	}
 
 	public List<AssetResponse> listAssets(Long customerId) {
-		Long callerId = authService.getAuthenticatedCustomerId();
+		Long callerId = getAuthenticatedCustomerId();
 
-		if (!callerId.equals(customerId) && !authService.isAdmin()) {
+		if (!callerId.equals(customerId) && !isAdmin()) {
 			throw new SecurityException("Only customer or admins can list customer's assets");
 		}
 
@@ -36,5 +33,4 @@ public class AssetService {
 
 		return assets.stream().map(AssetResponse::from).collect(Collectors.toList());
 	}
-
 }

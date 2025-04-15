@@ -8,6 +8,10 @@ public class SecurityException extends BrokageApiException  {
 	public SecurityException(String message) {
         super(message);
     }
+	
+	public static SecurityException adminRequired() {
+		return new SecurityException("Admin privileges required");
+	}
 
     @Override
     public HttpStatus getStatus() {

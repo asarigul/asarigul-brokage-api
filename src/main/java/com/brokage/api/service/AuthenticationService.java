@@ -5,10 +5,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.brokage.api.config.ApplicationConfig;
@@ -22,22 +19,29 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 @Service
-public class AuthenticationService {
+public class AuthenticationService extends BaseService {
 	private final CustomerRepository customerRepository;
 	private final ApplicationConfig config;
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private final PasswordEncoder passwordEncoder;
 
-	public AuthenticationService(ApplicationConfig config, CustomerRepository customerRepository) {
+	public AuthenticationService(ApplicationConfig config, CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
 		this.config = config;
 		this.customerRepository = customerRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 	
 	
 	public LoginResponse login(String username, String password) {
-		Customer customer = customerRepository.findByUsernameAndPassword(username, password)
+		Customer customer = customerRepository.findByUsername(username)
 				.orElseThrow(() -> new SecurityException("Invalid credentials"));
 		
+		if(! passwordEncoder.matches(password, customer.getPassword())) {
+			throw new SecurityException("Invalid credentials");
+		}
+		
 		String token = generateToken(customer.getId(), customer.isAdmin());
+		
+		logger.info("Customer {} authenticated", username);
 		
 		return new LoginResponse(token);
 	}
@@ -53,32 +57,4 @@ public class AuthenticationService {
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
-	
-	public Long getAuthenticatedCustomerId() {
-		return Long.valueOf(ensureAuthentication().getPrincipal().toString());
-	}
-
-	public boolean isAdmin() {
-		return (Boolean) ensureAuthentication().getCredentials();
-	}
-	
-//	p ublic void createAdminUser() {
-//		if(customerRepository.findByIsAdmin(true).isEmpty()) {
-//			Customer admin = new Customer();
-//			admin.setAdmin(true);
-//			admin.setUsername("admin");
-//			admin.setPassword("admin");
-//			customerRepository.save(admin);
-//			
-//			logger.warn("Default admin user created. Username: " + admin.getUsername() + ", password: " + admin.getPassword());
-//		}
-//	}
-	
-	private static Authentication ensureAuthentication() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if(authentication == null) {
-			throw new SecurityException("Not authenticated!");
-		}
-		return authentication;
-	}
 }

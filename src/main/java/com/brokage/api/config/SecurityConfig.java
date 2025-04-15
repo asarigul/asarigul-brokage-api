@@ -1,5 +1,7 @@
 package com.brokage.api.config;
 
+import java.util.Set;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -13,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 	private final JWTAuthenticationFilter jwtAuthenticationFilter;
+	static final Set<String> PUBLIC_ENDPOINTS = Set.of("/api/login", "/h2-console/**");
 	
 	
 	public SecurityConfig(JWTAuthenticationFilter jwtAuthenticationFilter) {
@@ -25,7 +28,7 @@ public class SecurityConfig {
 		return http.csrf(csrf -> csrf.disable())
 				// Allow H2 console in frames
 				.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) 
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/login", "/h2-console/**").permitAll()
+				.authorizeHttpRequests(auth -> auth.requestMatchers(PUBLIC_ENDPOINTS.toArray(new String[0])).permitAll()
 						.anyRequest().authenticated())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).build();
 	}

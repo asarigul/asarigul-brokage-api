@@ -1,6 +1,7 @@
 package com.brokage.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.brokage.api.exception.AssetNotFoundException;
@@ -34,9 +36,7 @@ public class CustomerOrderServiceTest {
 	@Mock
 	private AssetRepository assetRepository;
 
-	@Mock
-	private AuthenticationService authService;;
-
+	@Spy
 	@InjectMocks
 	private OrderService orderService;
 
@@ -44,7 +44,7 @@ public class CustomerOrderServiceTest {
 	
 	@BeforeEach
 	void mockAuthentication() {
-		when(authService.getAuthenticatedCustomerId()).thenReturn(CUSTOMER_ID);
+		doReturn(CUSTOMER_ID).when(orderService).getAuthenticatedCustomerId();
 	}
 
 

@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,7 +19,7 @@ public class AssetIntegrationTest extends BaseIntegrationTest {
 	@Autowired
 	private TestHelper helper;
 	
-	private static final Set<String> ASSETS = new HashSet<>(Arrays.asList("A", "B", "C", "D"));
+	private static final Set<String> ASSETS = Set.of("Asset_1", "Asset_2", "Asset_3", "Asset_4");
 	
 	@BeforeAll
 	static void setup(@Autowired TestHelper helper) throws Exception {

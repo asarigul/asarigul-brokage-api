@@ -3,11 +3,11 @@ package com.brokage.api.integration;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.brokage.api.dto.LoginRequest;
+import com.brokage.api.model.Customer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class AuthenticationIntegrationTest extends BaseIntegrationTest {
@@ -15,14 +15,10 @@ public class AuthenticationIntegrationTest extends BaseIntegrationTest {
 	@Autowired
 	private TestHelper helper;
 	
-	@BeforeEach
-	void setup() throws Exception {
-		helper.customer();
-	}
-	
 	@Test
 	void login_shouldReturnJwtToken_whenCredentialsAreValid() throws Exception {
-		LoginRequest loginRequest = new LoginRequest(TestHelper.USERNAME, TestHelper.PASSWORD);
+		Customer customer = helper.customer();
+		LoginRequest loginRequest = new LoginRequest(customer.getUsername(), customer.getPassword());
 		
 		helper.post("/api/login", loginRequest, null)
 			.andExpect(status().isOk())
@@ -31,7 +27,7 @@ public class AuthenticationIntegrationTest extends BaseIntegrationTest {
 
 	@Test
 	void login_shouldFail_whenCredentialsAreInvalid() throws JsonProcessingException, Exception {
-		LoginRequest loginRequest = new LoginRequest("", "");
+		LoginRequest loginRequest = new LoginRequest("ghost", "ghost");
 		
 		helper.post("/api/login", loginRequest, null)
 			.andExpect(status().is(UNAUTHORIZED));
@@ -46,6 +42,6 @@ public class AuthenticationIntegrationTest extends BaseIntegrationTest {
 	@Test
 	void accessProtectedEndpoint_shouldFailWithInvalidToken() throws Exception {
 		helper.post("/api/orders", "", null)
-			.andExpect(status().is(FORBIDDEN));
+			.andExpect(status().is(UNAUTHORIZED));
 	}
 }
