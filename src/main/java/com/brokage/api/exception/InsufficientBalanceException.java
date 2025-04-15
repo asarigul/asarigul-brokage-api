@@ -8,7 +8,7 @@ public class InsufficientBalanceException extends BrokageApiException {
 	private static final long serialVersionUID = -6759489190109111167L;
 
 	public InsufficientBalanceException(Long customerId, BigDecimal amount, String assetName) {
-		super("Customer " + customerId + " does not have " + amount.toString() + " " + assetName);
+		super(String.format("Customer: %d does not have: %s %s", customerId, amount, assetName));
 	}
 
 	@Override

@@ -6,7 +6,7 @@ public class OrderNotFoundException extends BrokageApiException  {
 	private static final long serialVersionUID = 4882858803523020253L;
 
 	public OrderNotFoundException(Long orderId) {
-        super("Pending Order " + orderId + " not found.");
+        super(String.format("Pending Order %d not found", orderId));
     }
 
     @Override
