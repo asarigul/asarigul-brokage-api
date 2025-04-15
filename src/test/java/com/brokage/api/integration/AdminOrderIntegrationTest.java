@@ -11,7 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.brokage.api.dto.OrderRequest;
 import com.brokage.api.dto.OrderResponse;
 import com.brokage.api.model.Asset;
-import com.brokage.api.model.Order;
+import com.brokage.api.model.OrderSide;
+import com.brokage.api.model.OrderStatus;
 
 public class AdminOrderIntegrationTest extends BaseIntegrationTest {
 
@@ -20,15 +21,15 @@ public class AdminOrderIntegrationTest extends BaseIntegrationTest {
 
 	@Test
 	void matchOrder_shouldUpdateAssetsForCustomer_onBuy() throws Exception {
-		createAndMatchOrderAndAssertBalances(Order.Side.BUY, "EUR", BigDecimal.ONE, BigDecimal.TEN);
+		createAndMatchOrderAndAssertBalances(OrderSide.BUY, "EUR", BigDecimal.ONE, BigDecimal.TEN);
 	}
 
 	@Test
 	void matchOrder_shouldUpdateAssetsForCustomer_onSell() throws Exception {
-		createAndMatchOrderAndAssertBalances(Order.Side.SELL, "GBP", BigDecimal.ONE, BigDecimal.TEN);
+		createAndMatchOrderAndAssertBalances(OrderSide.SELL, "GBP", BigDecimal.ONE, BigDecimal.TEN);
 	}
 
-	void createAndMatchOrderAndAssertBalances(Order.Side side, String assetName, BigDecimal orderSize,
+	void createAndMatchOrderAndAssertBalances(OrderSide side, String assetName, BigDecimal orderSize,
 			BigDecimal orderPrice) throws Exception {		
 		Asset otherAssetBefore = helper.createAsset(assetName, BigDecimal.valueOf(100), helper.customer());
 		Asset tryAssetBefore = helper.getAsset("TRY").get();
@@ -43,11 +44,11 @@ public class AdminOrderIntegrationTest extends BaseIntegrationTest {
 		Asset otherAssetAfter = helper.getAsset(assetName).get();
 
 
-		assertEquals(matchResponse.status(), Order.Status.MATCHED);
+		assertEquals(matchResponse.status(), OrderStatus.MATCHED);
 		
 		BigDecimal totalAmount = orderSize.multiply(orderPrice);
 
-		if (side == Order.Side.BUY) {
+		if (side == OrderSide.BUY) {
 			// TRY size and usableSize decreased by totalAmount
 			assertEquals(0, tryAssetAfter.getUsableSize().compareTo(tryAssetBefore.getUsableSize().subtract(totalAmount)));
 			assertEquals(0, tryAssetAfter.getSize().compareTo(tryAssetBefore.getSize().subtract(totalAmount)));
@@ -56,7 +57,7 @@ public class AdminOrderIntegrationTest extends BaseIntegrationTest {
 			assertEquals(0, otherAssetAfter.getSize().compareTo(otherAssetBefore.getSize().add(orderSize)));
 			assertEquals(0, otherAssetAfter.getUsableSize().compareTo(otherAssetBefore.getUsableSize().add(orderSize)));
 
-		} else if (side == Order.Side.SELL) {
+		} else if (side == OrderSide.SELL) {
 			// TRY size and usableSize increased by totalAmount
 			assertEquals(0, tryAssetAfter.getSize().compareTo(tryAssetBefore.getSize().add(totalAmount)));
 			assertEquals(0, tryAssetAfter.getUsableSize().compareTo(tryAssetBefore.getUsableSize().add(totalAmount)));
@@ -67,7 +68,7 @@ public class AdminOrderIntegrationTest extends BaseIntegrationTest {
 		}
 	}
 
-	private OrderResponse createOrder(String assetName, Order.Side side, BigDecimal size, BigDecimal price)
+	private OrderResponse createOrder(String assetName, OrderSide side, BigDecimal size, BigDecimal price)
 			throws Exception {
 		OrderRequest orderRequest = new OrderRequest(assetName, side, size, price);
 		String createResponseStr = helper.post("/api/orders", orderRequest, helper.token())

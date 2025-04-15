@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.brokage.api.dto.OrderRequest;
 import com.brokage.api.dto.OrderResponse;
 import com.brokage.api.model.Asset;
-import com.brokage.api.model.Order;
+import com.brokage.api.model.OrderSide;
 
 public class SystemConcurrencyTest extends BaseIntegrationTest {
 	@Autowired
@@ -48,7 +48,7 @@ public class SystemConcurrencyTest extends BaseIntegrationTest {
 	                latch.countDown();
 	                latch.await();
 
-	                return createOrder(assetName, Order.Side.BUY, orderSize, price);
+	                return createOrder(assetName, OrderSide.BUY, orderSize, price);
 	            } catch (Exception e) {
 	                e.printStackTrace();
 	                return null;
@@ -82,7 +82,7 @@ public class SystemConcurrencyTest extends BaseIntegrationTest {
 	    assertEquals(0, otherAsset.getUsableSize().compareTo(BigDecimal.ZERO));
 	}
 
-	private OrderResponse createOrder(String assetName, Order.Side side, BigDecimal size, BigDecimal price)
+	private OrderResponse createOrder(String assetName, OrderSide side, BigDecimal size, BigDecimal price)
 			throws Exception {
 		OrderRequest orderRequest = new OrderRequest(assetName, side, size, price);
 		String createResponseStr = helper.post("/api/orders", orderRequest, helper.token())

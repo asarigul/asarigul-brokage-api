@@ -20,7 +20,8 @@ import com.brokage.api.exception.SecurityException;
 import com.brokage.api.model.Asset;
 import com.brokage.api.model.Customer;
 import com.brokage.api.model.Order;
-import com.brokage.api.model.Order.Side;
+import com.brokage.api.model.OrderSide;
+import com.brokage.api.model.OrderStatus;
 import com.brokage.api.repository.AssetRepository;
 import com.brokage.api.repository.OrderRepository;
 
@@ -50,13 +51,10 @@ public class CustomerOrderServiceTest {
 	@Test
 	void createOrder_shouldFail_whenInsufficientBalance() {
 		final BigDecimal insufficientTRY = BigDecimal.ONE;
-		String otherAsset = "BTC";
-		Side orderSide = Order.Side.BUY;
-		
 		mockTRYAsset(insufficientTRY);
 
 		assertThrows(InsufficientBalanceException.class, () -> {
-			orderService.createOrder(orderSide, otherAsset, BigDecimal.TEN, BigDecimal.TEN);
+			orderService.createOrder(OrderSide.BUY, "BTC", BigDecimal.TEN, BigDecimal.TEN);
 		});
 	}
 	
@@ -65,7 +63,7 @@ public class CustomerOrderServiceTest {
 		mockTRYAsset(BigDecimal.TEN);
 
 		assertThrows(AssetNotFoundException.class, () -> {
-			orderService.createOrder(Order.Side.SELL, "BTC", BigDecimal.TEN, BigDecimal.TEN);
+			orderService.createOrder(OrderSide.SELL, "BTC", BigDecimal.TEN, BigDecimal.TEN);
 		});
 	}
 	
@@ -95,7 +93,7 @@ public class CustomerOrderServiceTest {
 		savedOrder.setSize(BigDecimal.ONE);
 		savedOrder.setPrice(BigDecimal.TEN);
 		
-		when(orderRepository.findByIdAndStatus(orderId, Order.Status.PENDING)).thenReturn(Optional.of(savedOrder));
+		when(orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)).thenReturn(Optional.of(savedOrder));
 
 		assertThrows(SecurityException.class, () -> {
 			orderService.deleteOrder(orderId);

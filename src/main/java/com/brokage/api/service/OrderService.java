@@ -16,6 +16,8 @@ import com.brokage.api.exception.SecurityException;
 import com.brokage.api.model.Asset;
 import com.brokage.api.model.Customer;
 import com.brokage.api.model.Order;
+import com.brokage.api.model.OrderSide;
+import com.brokage.api.model.OrderStatus;
 import com.brokage.api.repository.AssetRepository;
 import com.brokage.api.repository.OrderRepository;
 
@@ -35,7 +37,7 @@ public class OrderService {
 	}
 
 	@Transactional
-	public OrderResponse createOrder(Order.Side side, String assetName, BigDecimal size, BigDecimal price) {
+	public OrderResponse createOrder(OrderSide side, String assetName, BigDecimal size, BigDecimal price) {
 		final Long customerId = authService.getAuthenticatedCustomerId();
 		final BigDecimal totalAmount = price.multiply(size);
 		
@@ -45,7 +47,7 @@ public class OrderService {
 		Asset otherAsset = assetRepository.findByCustomerIdAndAssetNameWithLock(customerId, assetName)
 	            .orElse(null);
 		
-		if(side == Order.Side.SELL) {
+		if(side == OrderSide.SELL) {
 			if(otherAsset == null) {
 				throw new AssetNotFoundException(customerId, assetName);
 			}
@@ -77,7 +79,7 @@ public class OrderService {
 
 		Order order = new Order();
 		order.setCustomer(new Customer(customerId));
-		order.setStatus(Order.Status.PENDING);
+		order.setStatus(OrderStatus.PENDING);
 		order.setCreateDate(LocalDateTime.now());
 		order.setAssetName(assetName);
 		order.setSide(side);
@@ -94,7 +96,7 @@ public class OrderService {
 	public OrderResponse deleteOrder(Long orderId) {
 		final Long customerId = authService.getAuthenticatedCustomerId();
 		
-		Order order = orderRepository.findByIdAndStatus(orderId, Order.Status.PENDING)
+		Order order = orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)
 				.orElseThrow(() -> new OrderNotFoundException(orderId));
 
 		if (customerId != order.getCustomerId()) {
@@ -111,7 +113,7 @@ public class OrderService {
 		final BigDecimal size = order.getSize();
 		final BigDecimal totalAmount = order.getPrice().multiply(size);
 		
-		if(order.getSide() == Order.Side.SELL) {
+		if(order.getSide() == OrderSide.SELL) {
 			otherAsset.setUsableSize(otherAsset.getUsableSize().add(size));
 			tryAsset.setSize(tryAsset.getSize().subtract(totalAmount));
 		} else {
@@ -122,7 +124,7 @@ public class OrderService {
 		tryAsset = assetRepository.save(tryAsset);
 		otherAsset = assetRepository.save(otherAsset);
 		
-		order.setStatus(Order.Status.CANCELED);
+		order.setStatus(OrderStatus.CANCELED);
 		orderRepository.save(order);
 		
 		return OrderResponse.from(order);
@@ -135,7 +137,7 @@ public class OrderService {
 			throw new SecurityException("Admin privileges required");
 		}
 		
-		Order order = orderRepository.findByIdAndStatus(orderId, Order.Status.PENDING)
+		Order order = orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)
 				.orElseThrow(() -> new OrderNotFoundException(orderId));
 
 		Long customerId = order.getCustomerId();
@@ -150,7 +152,7 @@ public class OrderService {
 		final BigDecimal size = order.getSize();
 		final BigDecimal totalAmount = order.getPrice().multiply(size);
 		
-		if(order.getSide() == Order.Side.SELL) {
+		if(order.getSide() == OrderSide.SELL) {
 			otherAsset.setSize(otherAsset.getSize().subtract(size));
 			tryAsset.setUsableSize(tryAsset.getUsableSize().add(totalAmount));
 		} else {
@@ -161,7 +163,7 @@ public class OrderService {
 		assetRepository.save(tryAsset);
 		assetRepository.save(otherAsset);
 		
-		order.setStatus(Order.Status.MATCHED);
+		order.setStatus(OrderStatus.MATCHED);
 		orderRepository.save(order);
 		
 		return OrderResponse.from(order);

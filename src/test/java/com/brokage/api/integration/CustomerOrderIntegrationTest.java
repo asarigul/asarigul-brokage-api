@@ -19,7 +19,8 @@ import com.brokage.api.dto.OrderRequest;
 import com.brokage.api.dto.OrderResponse;
 import com.brokage.api.model.Asset;
 import com.brokage.api.model.Customer;
-import com.brokage.api.model.Order;
+import com.brokage.api.model.OrderSide;
+import com.brokage.api.model.OrderStatus;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
@@ -34,15 +35,15 @@ public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
 
 	@Test
 	void createBuyOrder_shouldSucceed_whenCustomerHasSufficientBalance() throws Exception {
-		createOrderAndAssertBalances(Order.Side.BUY, "BTC", BigDecimal.ONE, BigDecimal.TEN);
+		createOrderAndAssertBalances(OrderSide.BUY, "BTC", BigDecimal.ONE, BigDecimal.TEN);
 	}
 
 	@Test
 	void createSellOrder_shouldSucceed_whenCustomerHasSufficientBalance() throws Exception {
-		createOrderAndAssertBalances(Order.Side.SELL, "ETH", BigDecimal.ONE, BigDecimal.TEN);
+		createOrderAndAssertBalances(OrderSide.SELL, "ETH", BigDecimal.ONE, BigDecimal.TEN);
 	}
 
-	void createOrderAndAssertBalances(Order.Side side, String assetName, BigDecimal orderSize,
+	void createOrderAndAssertBalances(OrderSide side, String assetName, BigDecimal orderSize,
 			BigDecimal orderPrice) throws Exception {
 		Customer customer = helper.customer();
 
@@ -51,7 +52,7 @@ public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
 
 		OrderResponse createOrderResponse = createOrder(assetName, side, orderSize, orderPrice);
 
-		assertEquals(Order.Status.PENDING, createOrderResponse.status());
+		assertEquals(OrderStatus.PENDING, createOrderResponse.status());
 		assertEquals(customer.getId(), createOrderResponse.customerId());
 		assertNotNull(createOrderResponse.id());
 		assertNotNull(createOrderResponse.createDate());
@@ -65,7 +66,7 @@ public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
 
 		BigDecimal totalAmount = orderSize.multiply(orderPrice);
 
-		if (side == Order.Side.BUY) {
+		if (side == OrderSide.BUY) {
 			// TRY usable size is deducted, size is unchanged
 			assertEquals(0, tryAssetBefore.getSize().compareTo(tryAssetAfter.getSize()));
 			assertEquals(0, tryAssetBefore.getUsableSize().compareTo(tryAssetAfter.getUsableSize().add(totalAmount)));
@@ -74,7 +75,7 @@ public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
 			assertEquals(0, otherAssetAfter.getSize().compareTo(otherAssetBefore.getSize().add(orderSize)));
 			assertEquals(0, otherAssetBefore.getUsableSize().compareTo(otherAssetAfter.getUsableSize()));
 
-		} else if (side == Order.Side.SELL) {
+		} else if (side == OrderSide.SELL) {
 			// TRY size increased, usable unchanged
 			assertEquals(0, tryAssetBefore.getUsableSize().compareTo(tryAssetAfter.getUsableSize()));
 			assertEquals(0, tryAssetAfter.getSize().compareTo(tryAssetBefore.getSize().add(totalAmount)));
@@ -88,7 +89,7 @@ public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
 	@Test
 	void deleteOrder_shouldSucceed_whenOrderIsPending() throws Exception {
 		String assetName = "AAPL";
-		OrderResponse createOrderResponse = createOrder(assetName, Order.Side.BUY, BigDecimal.ONE, BigDecimal.TEN);
+		OrderResponse createOrderResponse = createOrder(assetName, OrderSide.BUY, BigDecimal.ONE, BigDecimal.TEN);
 
 		Asset tryAssetBefore = helper.getAsset("TRY").get();
 		Asset otherAssetBefore = helper.getAsset(assetName).get();
@@ -102,7 +103,7 @@ public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
 		OrderResponse response = objectMapper.readValue(responseStr, OrderResponse.class);
 
 		// assert status changed
-		assertEquals(response.status(), Order.Status.CANCELED);
+		assertEquals(response.status(), OrderStatus.CANCELED);
 
 		BigDecimal totalAmount = response.price().multiply(response.size());
 
@@ -121,7 +122,7 @@ public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
 
 		Set<Long> orderIds = new HashSet<>();
 		for (int i = 0; i < orderCount; i++) {
-			OrderResponse orderResponse = createOrder("BTC", Order.Side.BUY, BigDecimal.ONE, BigDecimal.TEN);
+			OrderResponse orderResponse = createOrder("BTC", OrderSide.BUY, BigDecimal.ONE, BigDecimal.TEN);
 			orderIds.add(orderResponse.id());
 		}
 
@@ -138,7 +139,7 @@ public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
 		assertTrue(orders.stream().map(OrderResponse::id).collect(Collectors.toSet()).containsAll(orderIds));
 	}
 
-	private OrderResponse createOrder(String assetName, Order.Side side, BigDecimal size, BigDecimal price)
+	private OrderResponse createOrder(String assetName, OrderSide side, BigDecimal size, BigDecimal price)
 			throws Exception {
 		OrderRequest orderRequest = new OrderRequest(assetName, side, size, price);
 		String createResponseStr = helper.post("/api/orders", orderRequest, helper.token())

@@ -11,13 +11,14 @@ import org.springframework.data.repository.query.Param;
 
 import com.brokage.api.model.Customer;
 import com.brokage.api.model.Order;
+import com.brokage.api.model.OrderStatus;
 
 import jakarta.persistence.LockModeType;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT o FROM Order o WHERE o.id = :id AND o.status = :status")
-	Optional<Order> findByIdAndStatus(@Param("id") Long id, @Param("status") Order.Status status);
+	Optional<Order> findByIdAndStatus(@Param("id") Long id, @Param("status") OrderStatus status);
 
 	default List<Order> findByCustomerIdAndCreateDateBetween(Long customerId, LocalDateTime start, LocalDateTime end) {
 		return findByCustomerAndCreateDateBetween(new Customer(customerId), start, end);

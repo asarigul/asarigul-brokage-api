@@ -36,7 +36,7 @@ public class Order {
 	private String assetName;
 
 	@Enumerated(EnumType.STRING)
-	private Side side;
+	private OrderSide side;
 
 	@Column(nullable = false, precision = 19, scale = 4)
 	private BigDecimal size;
@@ -45,20 +45,11 @@ public class Order {
 	private BigDecimal price;
 
 	@Enumerated(EnumType.STRING)
-	private Status status;
+	private OrderStatus status;
 
-	//	TODO UTC ??
 	private LocalDateTime createDate;
 
-	public enum Side {
-		BUY, SELL
-	}
-
-	public enum Status {
-		PENDING, MATCHED, CANCELED
-	}
-
-	public Long getId() {
+		public Long getId() {
 		return id;
 	}
 
@@ -87,11 +78,11 @@ public class Order {
 		this.assetName = assetName;
 	}
 
-	public Side getSide() {
+	public OrderSide getSide() {
 		return side;
 	}
 
-	public void setSide(Side side) {
+	public void setSide(OrderSide side) {
 		this.side = side;
 	}
 
@@ -111,11 +102,11 @@ public class Order {
 		this.price = price;
 	}
 
-	public Status getStatus() {
+	public OrderStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(Status status) {
+	public void setStatus(OrderStatus status) {
 		this.status = status;
 	}
 

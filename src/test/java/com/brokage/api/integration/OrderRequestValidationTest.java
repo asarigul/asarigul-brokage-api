@@ -9,14 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import com.brokage.api.dto.OrderRequest;
-import com.brokage.api.model.Order;
-import com.brokage.api.model.Order.Side;
+import com.brokage.api.model.OrderSide;
 
 public class OrderRequestValidationTest extends BaseIntegrationTest {
 	private static final String VALID_ASSET_NAME = "USD";
 	private static final BigDecimal VALID_SIZE = BigDecimal.ONE;
 	private static final BigDecimal VALID_PRICE = BigDecimal.ONE;
-	private static final Side VALID_SIDE = Order.Side.SELL;
+	private static final OrderSide VALID_SIDE = OrderSide.SELL;
 
 	@Autowired
 	private TestHelper helper;
@@ -29,7 +28,7 @@ public class OrderRequestValidationTest extends BaseIntegrationTest {
 	
 	@Test
 	public void testOrderRequest_MissingOrderSide() throws Exception {
-		final Order.Side missingOrderSide = null;
+		final OrderSide missingOrderSide = null;
 		testInvalidOrderRequest(VALID_ASSET_NAME, missingOrderSide, VALID_SIZE, VALID_PRICE);
 	}
 	
@@ -57,7 +56,7 @@ public class OrderRequestValidationTest extends BaseIntegrationTest {
 		testInvalidOrderRequest(VALID_ASSET_NAME, VALID_SIDE, VALID_SIZE, negativePrice);
 	}
 
-	private void testInvalidOrderRequest(String assetName, Order.Side side, BigDecimal size, BigDecimal price)
+	private void testInvalidOrderRequest(String assetName, OrderSide side, BigDecimal size, BigDecimal price)
 			throws Exception {
 		OrderRequest request = new OrderRequest(assetName, side, size, price);
 		

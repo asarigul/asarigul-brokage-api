@@ -2,7 +2,7 @@ package com.brokage.api.dto;
 
 import java.math.BigDecimal;
 
-import com.brokage.api.model.Order;
+import com.brokage.api.model.OrderSide;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +13,7 @@ public record OrderRequest(
 		String assetName,
 		
 		@NotNull(message = "side required")
-		Order.Side side,
+		OrderSide side,
 		
 		@NotNull(message = "Positive size required")
 		@Positive(message = "Positive size required")
