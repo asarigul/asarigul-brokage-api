@@ -96,11 +96,12 @@ Http 401 UNAUTHORIZED
 }
 
 ```
-- Include returned token in all requests using the Authorization header. Otherwise you will get 401 UNAUTHORIZED error..
+- Include returned token in all requests using the Authorization header. Otherwise you will get 401 UNAUTHORIZED error.
 ```
 Authorization: Bearer <your_token>
 ```
 - Default token expiry is 180 minutes. You can update it in application/properties (```jwt.expiryMinutes=180```).
+
 
 ### Create Customer (Optional service)
 ```
@@ -127,9 +128,13 @@ or
     "message": "Non-blank username required", // or "Non-blank password required"
     "timestamp": ...
 }
+
+400 BAD REQUEST (Existing user)
+{
+    "message": "Customer: someuser already exists",
+    "timestamp": ...
+}
 ```
-
-
 
 ### Create Order
 ```
@@ -165,13 +170,13 @@ or
 
 404 NOT FOUND (Missing required asset)
 {
-    "message": "Asset USD not found for customer 1",
+    "message": "Asset: USD not found for customer: 1",
     "timestamp": ...
 }
 
 400 BAD REQUEST (Insufficient Funds)
 {
-    "message": "Customer 1 does not have 100.0000 USD",
+    "message": "Customer: 1 does not have: 100.0000 USD",
     "timestamp": ...
 }
 ```
@@ -186,6 +191,7 @@ DELETE /api/orders/<orderId>
 
 RETURNS:
 
+200 OK
 {
     "id": 1,
     "customerId": 1,
@@ -205,7 +211,7 @@ or
     "timestamp": ...
 }
 
-401 UNAUTHORIZED (Order is not owned)
+401 UNAUTHORIZED (Order owner is someone else)
 {
     "message": "Order is not owned by the current user",
     "timestamp": ...
@@ -218,6 +224,7 @@ PUT /api/orders/<orderId>
 
 RETURNS:
 
+200 OK
 {
     "id": 1,
     "customerId": 1,
@@ -239,13 +246,14 @@ or
 ```
 Notes:
 - This is an admin-only end-point. Admin users have isAdmin = true flag in customer table. 
-- a default admin account (username: admin, password: admin) created in dev profile on app startup. You can also use H2 console (localhost:8080/h2-console) to create/update users.
+- A default admin account (username: admin, password: adminpass) created in dev profile on app startup. Please see **About initial user(s) creation** section for details.
 
 ### List Orders
 ```
 GET /api/orders[?startDate=2025-04-01T08:00:00&endDate=2025-04-10T18:00:00]
 
 RETURNS:
+200 OK
 [
     {
         "id": 1,
@@ -265,17 +273,61 @@ Note:
 - startDate and endDate params are optional. By default, orders in last 365 days are returned.
 
 
+### Create Assets (Optional service)
+```
+POST /api/assets
+{
+    "customerId": 1,
+    "assetName": "USD",
+    "size": 100,
+    "usableSize": 100
+}
+
+RETURNS:
+
+201 CREATED
+{
+    "id": 1,
+    "customerId": 1,
+    "assetName": "USD",
+    "size": 100,
+    "usableSize": 100
+}
+
+or
+
+401 UNAUTHORIZED (Admin privileges required)
+{
+    "message": "Admin privileges required",
+    "timestamp": ...
+}
+
+404 NOT FOUND (Customer not found)
+{
+    "message": "Customer 1 not found",
+    "timestamp": ...
+}
+
+400 BAD REQUEST (Asset already exists for customer)
+{
+    "message": "Asset: USD already exists for customer: 1",
+    "timestamp": ...
+}
+```
+
+
 ### List Assets of Current User
 ```
 GET /api/assets 
 
 RETURNS:
+
+200 OK
 [
     {
         "id": 1,
         "customerId": 1,
         "assetName": "USD",
-        "side": "SELL",
         "size": 100,
         "usableSize": 100
     }
@@ -284,7 +336,7 @@ RETURNS:
 
 ```
 
-### List Assets 
+### List Assets (of any user)
 ```
 GET /api/assets/<customerId>
 
@@ -305,9 +357,7 @@ or
 
 401 UNAUTHORIZED (Admin privileges required)
 {
-    "message": "Only customer or admins can list customer's assets",
+    "message": "Only asset owner or admins can list customer's assets",
     "timestamp": ...
 }
 ```
-Note:
-- This is an admin endpoint. Only admin user can list assets of anyone. 

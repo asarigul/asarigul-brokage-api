@@ -18,11 +18,12 @@ public abstract class BaseIntegrationTest {
 	protected static final int FORBIDDEN = HttpStatus.FORBIDDEN.value();
 	protected static final int UNAUTHORIZED = HttpStatus.UNAUTHORIZED.value();
 	protected static final int CREATED = HttpStatus.CREATED.value();
+	protected static final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
+	protected static final int NOT_FOUND = HttpStatus.NOT_FOUND.value();
 
 	@Autowired
 	protected MockMvc mockMvc;
 
 	@Autowired
 	protected ObjectMapper objectMapper;
-	
 }

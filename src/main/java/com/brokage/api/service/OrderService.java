@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.brokage.api.dto.OrderResponse;
 import com.brokage.api.exception.AssetNotFoundException;
 import com.brokage.api.exception.InsufficientBalanceException;
+import com.brokage.api.exception.InvalidArgumentException;
 import com.brokage.api.exception.OrderNotFoundException;
 import com.brokage.api.exception.SecurityException;
 import com.brokage.api.model.Asset;
@@ -197,6 +198,10 @@ public class OrderService extends BaseService {
 
 		if (startDate == null) {
 			startDate = endDate.minus(Duration.ofDays(365));
+		}
+		
+		if(startDate.compareTo(endDate) >= 0) {
+			throw new InvalidArgumentException("startDate must be before than endDate");
 		}
 
 		List<Order> orders = orderRepository.findByCustomerIdAndCreateDateBetween(customerId, startDate, endDate);
