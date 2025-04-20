@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.brokage.api.dto.AssetResponse;
 import com.brokage.api.dto.CreateAssetRequest;
-import com.brokage.api.dto.CreateCustomerRequest;
-import com.brokage.api.dto.CreateCustomerResponse;
 import com.brokage.api.model.Asset;
 
 public class CreateAssetIntegrationTest extends BaseIntegrationTest {
@@ -26,7 +24,7 @@ public class CreateAssetIntegrationTest extends BaseIntegrationTest {
 		
 		helper.post("/api/assets", request, helper.adminToken())
 				.andExpect(status().is(NOT_FOUND));
-	}
+	}	
 	
 	@Test
 	void createAsset_shouldFail_whenCustomerAlreadyHasAsset() throws Exception {

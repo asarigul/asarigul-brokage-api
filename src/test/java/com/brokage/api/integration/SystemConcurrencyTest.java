@@ -64,7 +64,9 @@ public class SystemConcurrencyTest extends BaseIntegrationTest {
 	    for (Future<OrderResponse> future : futures) {
 	        try {
 	            OrderResponse response = future.get();
-	            if (response != null) successfulOrders.add(response);
+	            if (response != null) {
+	            	successfulOrders.add(response);
+	            }
 	        } catch (Exception ignored) {}
 	    }
 

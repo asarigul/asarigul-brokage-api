@@ -119,7 +119,7 @@ public class OrderService extends BaseService {
 		Order order = orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)
 				.orElseThrow(() -> new OrderNotFoundException(orderId));
 
-		if (customerId != order.getCustomerId()) {
+		if (customerId.compareTo(order.getCustomerId()) != 0) {
 			throw new SecurityException("Order is not owned by the current user");
 		}
 

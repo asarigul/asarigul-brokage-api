@@ -111,7 +111,7 @@ public class CustomerOrderIntegrationTest extends BaseIntegrationTest {
 		assertEquals(tryAssetAfter.getSize().compareTo(tryAssetBefore.getSize()), 0);
 		assertEquals(tryAssetAfter.getUsableSize().compareTo(tryAssetBefore.getUsableSize().add(totalAmount)), 0);
 
-		// assert other asset (BTC) size deducted, usableSize unchanged
+		// assert other asset (AAPL) size deducted, usableSize unchanged
 		assertEquals(otherAssetBefore.getSize().compareTo(otherAssetAfter.getSize().add(response.size())), 0);
 		assertEquals(otherAssetAfter.getUsableSize().compareTo(otherAssetBefore.getUsableSize()), 0);
 	}
