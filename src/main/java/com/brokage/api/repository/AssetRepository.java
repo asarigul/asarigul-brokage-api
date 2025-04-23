@@ -7,12 +7,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.brokage.api.model.Asset;
 import com.brokage.api.model.Customer;
 
 import jakarta.persistence.LockModeType;
 
+@Repository
 public interface AssetRepository extends JpaRepository<Asset, Long> {
 	default List<Asset> findByCustomerId(Long customerId) {
 		return findByCustomer(new Customer(customerId));

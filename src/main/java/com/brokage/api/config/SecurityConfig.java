@@ -28,8 +28,10 @@ public class SecurityConfig {
 		return http.csrf(csrf -> csrf.disable())
 				// Allow H2 console in frames
 				.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) 
-				.authorizeHttpRequests(auth -> auth.requestMatchers(PUBLIC_ENDPOINTS.toArray(new String[0])).permitAll()
-						.anyRequest().authenticated())
+				.authorizeHttpRequests(
+					auth -> auth.requestMatchers(
+								PUBLIC_ENDPOINTS.toArray(new String[0])).permitAll().anyRequest().authenticated()
+				)
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).build();
 	}
 	
