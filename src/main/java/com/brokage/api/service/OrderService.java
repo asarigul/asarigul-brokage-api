@@ -37,6 +37,10 @@ public class OrderService extends BaseService {
 
 	@Transactional
 	public OrderResponse createOrder(OrderSide side, String assetName, BigDecimal size, BigDecimal price) {
+		if (TRY.equals(assetName)) {
+			throw new InvalidArgumentException("Trading with TRY is not allowed");
+		}
+		
 		final Long customerId = getAuthenticatedCustomerId();
 		final BigDecimal totalAmount = price.multiply(size);
 

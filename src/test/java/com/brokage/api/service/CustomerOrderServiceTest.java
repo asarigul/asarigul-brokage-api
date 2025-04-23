@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.brokage.api.exception.AssetNotFoundException;
 import com.brokage.api.exception.InsufficientBalanceException;
+import com.brokage.api.exception.InvalidArgumentException;
 import com.brokage.api.exception.OrderNotFoundException;
 import com.brokage.api.exception.SecurityException;
 import com.brokage.api.model.Asset;
@@ -41,12 +42,11 @@ public class CustomerOrderServiceTest {
 	private OrderService orderService;
 
 	private static final Long CUSTOMER_ID = 1L;
-	
+
 	@BeforeEach
 	void mockAuthentication() {
 		doReturn(CUSTOMER_ID).when(orderService).getAuthenticatedCustomerId();
 	}
-
 
 	@Test
 	void createOrder_shouldFail_whenInsufficientBalance() {
@@ -57,7 +57,14 @@ public class CustomerOrderServiceTest {
 			orderService.createOrder(OrderSide.BUY, "BTC", BigDecimal.TEN, BigDecimal.TEN);
 		});
 	}
-	
+
+	@Test
+	void createOrder_shouldFail_withTRYAsset() {
+		assertThrows(InvalidArgumentException.class, () -> {
+			orderService.createOrder(OrderSide.BUY, "TRY", BigDecimal.TEN, BigDecimal.TEN);
+		});
+	}
+
 	@Test
 	void createSellOrder_shouldFail_whenMissingAsset() {
 		mockTRYAsset(BigDecimal.TEN);
@@ -66,7 +73,7 @@ public class CustomerOrderServiceTest {
 			orderService.createOrder(OrderSide.SELL, "BTC", BigDecimal.TEN, BigDecimal.TEN);
 		});
 	}
-	
+
 	private void mockTRYAsset(BigDecimal size) {
 		Asset tryAsset = new Asset();
 		tryAsset.setAssetName("TRY");
@@ -82,8 +89,8 @@ public class CustomerOrderServiceTest {
 	void deleteOrder_shouldFail_whenOrderNotOwnedByCustomer() {
 		String assetName = "BTC";
 		Long orderId = 1L;
-		
-		// Authenticated customerId (1) != ownerId 
+
+		// Authenticated customerId (1) != ownerId
 		Long ownerId = 999L;
 
 		Order savedOrder = new Order();
@@ -92,7 +99,7 @@ public class CustomerOrderServiceTest {
 		savedOrder.setAssetName(assetName);
 		savedOrder.setSize(BigDecimal.ONE);
 		savedOrder.setPrice(BigDecimal.TEN);
-		
+
 		when(orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)).thenReturn(Optional.of(savedOrder));
 
 		assertThrows(SecurityException.class, () -> {
@@ -104,7 +111,7 @@ public class CustomerOrderServiceTest {
 	void deleteOrder_shouldFail_whenNoPendingOrder() {
 		// no order for id & PENDING status
 		assertThrows(OrderNotFoundException.class, () -> {
-			orderService.deleteOrder(1L);			
+			orderService.deleteOrder(1L);
 		});
 	}
 
