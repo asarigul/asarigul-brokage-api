@@ -1,6 +1,8 @@
 package com.brokage.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -77,12 +79,12 @@ public class CustomerOrderServiceTest {
 	private void mockTRYAsset(BigDecimal size) {
 		Asset tryAsset = new Asset();
 		tryAsset.setAssetName("TRY");
-		tryAsset.setCustomer(new Customer(CUSTOMER_ID));
+		Customer customer = new Customer(CUSTOMER_ID);
+		tryAsset.setCustomer(customer);
 		tryAsset.setSize(size);
 		tryAsset.setUsableSize(size);
 
-		when(assetRepository.findByCustomerAndAssetNameWithLock(new Customer(CUSTOMER_ID), "TRY"))
-				.thenReturn(Optional.of(tryAsset));
+		when(assetRepository.findByCustomerAndAssetNameWithLock(any(Customer.class), eq("TRY"))).thenReturn(Optional.of(tryAsset));
 	}
 
 	@Test
