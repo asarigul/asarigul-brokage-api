@@ -79,8 +79,7 @@ public class CustomerOrderServiceTest {
 	private void mockTRYAsset(BigDecimal size) {
 		Asset tryAsset = new Asset();
 		tryAsset.setAssetName("TRY");
-		Customer customer = new Customer(CUSTOMER_ID);
-		tryAsset.setCustomer(customer);
+		tryAsset.setCustomer(new Customer(CUSTOMER_ID));
 		tryAsset.setSize(size);
 		tryAsset.setUsableSize(size);
 
