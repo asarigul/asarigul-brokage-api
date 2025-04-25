@@ -43,11 +43,12 @@ public class OrderService extends BaseService {
 		
 		final Long customerId = getAuthenticatedCustomerId();
 		final BigDecimal totalAmount = price.multiply(size);
-
-		Asset tryAsset = assetRepository.findByCustomerIdAndAssetNameWithLock(customerId, TRY)
+		final Customer customer = new Customer(customerId);
+		
+		Asset tryAsset = assetRepository.findByCustomerAndAssetNameWithLock(customer, TRY)
 				.orElseThrow(() -> new AssetNotFoundException(customerId, TRY));
 
-		Asset otherAsset = assetRepository.findByCustomerIdAndAssetNameWithLock(customerId, assetName).orElse(null);
+		Asset otherAsset = assetRepository.findByCustomerAndAssetNameWithLock(customer, assetName).orElse(null);
 
 		/* 
 		 * Locking asset amounts:
@@ -88,7 +89,7 @@ public class OrderService extends BaseService {
 			if (otherAsset == null) {
 				otherAsset = new Asset();
 				otherAsset.setAssetName(assetName);
-				otherAsset.setCustomer(new Customer(customerId));
+				otherAsset.setCustomer(customer);
 				otherAsset.setSize(BigDecimal.ZERO);
 				otherAsset.setUsableSize(BigDecimal.ZERO);
 			}
@@ -100,7 +101,7 @@ public class OrderService extends BaseService {
 		otherAsset = assetRepository.save(otherAsset);
 
 		Order order = new Order();
-		order.setCustomer(new Customer(customerId));
+		order.setCustomer(customer);
 		order.setStatus(OrderStatus.PENDING);
 		order.setCreateDate(LocalDateTime.now());
 		order.setAssetName(assetName);
@@ -127,10 +128,12 @@ public class OrderService extends BaseService {
 			throw new SecurityException("Order is not owned by the current user");
 		}
 
-		Asset tryAsset = assetRepository.findByCustomerIdAndAssetNameWithLock(customerId, TRY)
+		final Customer customer = new Customer(customerId);
+		
+		Asset tryAsset = assetRepository.findByCustomerAndAssetNameWithLock(customer, TRY)
 				.orElseThrow(() -> new AssetNotFoundException(customerId, TRY));
 
-		Asset otherAsset = assetRepository.findByCustomerIdAndAssetNameWithLock(customerId, order.getAssetName())
+		Asset otherAsset = assetRepository.findByCustomerAndAssetNameWithLock(customer, order.getAssetName())
 				.orElseThrow(() -> new AssetNotFoundException(customerId, order.getAssetName()));
 
 		final BigDecimal size = order.getSize();
@@ -164,12 +167,13 @@ public class OrderService extends BaseService {
 		Order order = orderRepository.findByIdAndStatus(orderId, OrderStatus.PENDING)
 				.orElseThrow(() -> new OrderNotFoundException(orderId));
 
-		Long customerId = order.getCustomerId();
+		final Long customerId = order.getCustomerId();
+		final Customer customer = new Customer(customerId);
 
-		Asset tryAsset = assetRepository.findByCustomerIdAndAssetNameWithLock(customerId, TRY)
+		Asset tryAsset = assetRepository.findByCustomerAndAssetNameWithLock(customer, TRY)
 				.orElseThrow(() -> new AssetNotFoundException(customerId, TRY));
 
-		Asset otherAsset = assetRepository.findByCustomerIdAndAssetNameWithLock(customerId, order.getAssetName())
+		Asset otherAsset = assetRepository.findByCustomerAndAssetNameWithLock(customer, order.getAssetName())
 				.orElseThrow(() -> new AssetNotFoundException(customerId, order.getAssetName()));
 
 		final BigDecimal size = order.getSize();

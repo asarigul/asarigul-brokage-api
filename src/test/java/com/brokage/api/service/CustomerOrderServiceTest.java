@@ -81,7 +81,7 @@ public class CustomerOrderServiceTest {
 		tryAsset.setSize(size);
 		tryAsset.setUsableSize(size);
 
-		when(assetRepository.findByCustomerIdAndAssetNameWithLock(CUSTOMER_ID, "TRY"))
+		when(assetRepository.findByCustomerAndAssetNameWithLock(new Customer(CUSTOMER_ID), "TRY"))
 				.thenReturn(Optional.of(tryAsset));
 	}
 

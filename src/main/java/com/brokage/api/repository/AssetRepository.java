@@ -22,10 +22,6 @@ public interface AssetRepository extends JpaRepository<Asset, Long> {
 	
 	List<Asset> findByCustomer(Customer customer);
 	
-	default Optional<Asset> findByCustomerIdAndAssetNameWithLock(Long customerId, String assetName) {
-		return findByCustomerAndAssetNameWithLock(new Customer(customerId), assetName);
-	}
-
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT a FROM Asset a WHERE a.customer = :customer AND a.assetName = :assetName")
 	Optional<Asset> findByCustomerAndAssetNameWithLock(@Param("customer") Customer customer,
